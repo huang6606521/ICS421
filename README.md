@@ -7,12 +7,11 @@ ICS 421 is an advanced data management course covering data partitioning/shardin
 For more detail, please see the [course website](https://lipyeow.github.io/ics421s18/).
 
 # Table of Content
-===========================
+
   * [Before Start](#bs)
   * Assignment List
     * [Assignment 1: DDL Processing for Parallel DBMS](#a1)
-    
-===========================
+
 
 ## <a name = "bs"></a> Before Start
 
