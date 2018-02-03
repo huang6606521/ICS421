@@ -7,7 +7,7 @@
 # Assignment: #1 (for detail, please see 
 #                 https://lipyeow.github.io/ics421s18/morea/pardb/experience-hw1.html)
 # File: parDBd.py
-# Description: server program  
+# Description: server program
 #
 ##########################################################################################
 
@@ -35,7 +35,7 @@ class ListenThread(threading.Thread):
         self.ip = ip
         self.port = port
         self.csocket = clientSocket
-        # print("New Thread started for " + ip + " " + str(port))
+        print("New Thread started for " + ip + " " + str(port))
 
     def run(self):
         '''
@@ -45,29 +45,76 @@ class ListenThread(threading.Thread):
                 database and execute the sql command and send back the message whether
                 command success or failed.
             if the server is catalog
+                recv the database name and open db connection, then create dtable if not
+                exist. Receive the number of information update. Loop to receive all info
+                about each update and execute sql insert or delete base on the info, then
+                send back message if success or fail.
         '''
-        print("Connection from " + ip + " " + str(port))
+        c_or_n = self.csocket.recv(1024).decode()
+        if c_or_n.find("nodeid") >= 0:
+            # receive the dababase file name
+            dbfile = self.csocket.recv(1024).decode()
+        
+            # receive the sql command for create or drop table
+            sqlcmd = self.csocket.recv(1024).decode()
+        
+            # try connect to the database file and execute the sql command
+            try:
+                dbconn = sqlite3.connect(dbfile)
+                cur = dbconn.cursor()
+                cur.execute(sqlcmd)
+                self.csocket.send("Success".encode())
+            
+            # send fail message if error
+            except sqlite3.Error:
+                self.csocket.send("Fail".encode())
+            
+            # clean up
+            finally:
+                cur.close()
+                dbconn.commit()
+                dbconn.close()
+        else:
+            
+            # receive dbfile name
+            dbfile = self.csocket.recv(1024).decode()
+        
+            try:
+                # connect to database
+                dbconn = sqlite3.connect(dbfile)
+                cur = dbconn.cursor()
 
-        # receive the dababase file name
-        dbfile = self.csocket.recv(1024).decode()
-
-        print(dbfile)
+                # create dtable if not exists
+                try:
+                    cur.execute("CREATE TABLE DTABLE(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, nodeid int, partparam1 char(32), partparam2 char(32));")
+                except:
+                    pass
+            
+                # num of update need to execute
+                numUpdate = int(self.csocket.recv(1024).decode())
+                
+                # loop receive info and base on it, either insert or delete
+                for i in range(numUpdate):
+                    temp = self.csocket.recv(1024).decode().split(" ")
+                    if temp[0] == "CREATE":
+                        cur.execute("INSERT INTO DTABLE(tname, nodedriver, nodeurl, nodeuser, nodepasswd, partmtd, nodeid, partparam1, partparam2) VALUES ('{0}', '{1}', NULL, NULL, NULL, NULL, '{2}', NULL, NULL);".format(temp[1], temp[2], int(temp[3])))
+                    elif temp[0] == "DROP":
+                        cur.execute("DELETE FROM DTABLE WHERE tname = '{0}' AND nodeid = '{1}'".format(temp[1], int(temp[3])))
         
-        self.csocket.send(dbfile.encode())
-        # receive the sql command for create or drop table
-        sqlcmd = self.csocket.recv(1024).decode()
+                # send updated message if no error
+                self.csocket.send("Updated".encode())
+                    
+            # send fail message if error occurs
+            except sqlite3.Error:
+                self.csocket.send("Fail".encode())
+            
+            # clean up
+            finally:
+                cur.close()
+                dbconn.commit()
+                dbconn.close()
         
-        # try connect to the database file and execute the sql command
-        try:
-            dbconn = sqlite3.connect(dbfile)
-            cur = dbconn.cursor()
-            cur.execute(sqlcmd)
-    
-            self.csocket.send("Success".encode())
-        except sqlite3.Error:
-            self.csocket.send("Fail".encode())
-        
-        # print("Disconnecting")        
+        # close connection
         self.csocket.close()
 
 
@@ -79,7 +126,7 @@ if len(sys.argv) != 3:
 
 host = sys.argv[1]
 
-# Check for correct port number
+# Check for correct port number input
 try:
     port = int(sys.argv[2])
 except ValueError:
@@ -111,4 +158,5 @@ while True:
     newThread = ListenThread(ip, port, conn)
     newThread.start()
 
-
+# close server socket
+mySocket.close()
