@@ -11,6 +11,7 @@ For more detail, please see the [course website](https://lipyeow.github.io/ics42
   * [Before Start](#bs)
   * [Assignment List](#al)
     * [Assignment 1: DDL Processing for Parallel DBMS](#a1)
+    * [Assignment 2: Naive SQL Processing for Parallel DBMS](#a2)
 
 
 # <a name = "bs"></a> Before Start
@@ -19,7 +20,17 @@ something....
 
 # <a name = "al"></a>Assignment List
 ## <a name = "a1"></a> Assignment 1: DDL Processing for Parallel DBMS
+    * Know how to program a distributed system using sockets
+    * Understand how to create tables in a parallel DBMS
+    * Able to write a program to process DDLs including Able to update the catalog/metadata for a parallel SQL processing system
+    * Able to document the program design and usage clearly
 
-This first assignment guides you through the implementation of the DDL processing component of a parallel SQL processing system. The parallel SQL processing system consists of a cluster of DBMS instances running on different machines (possibly virtual machines). DDLs submitted to the system will need to be translated into corresponding DDLs for each individual DBMS instance in the cluster and executed there. In addition a catalog database stores metadata about what data is stored for each table on each DBMS instance in the cluster.
+For more details, please see the [assignment 1](https://lipyeow.github.io/ics421s18/morea/pardb/experience-hw1.html).
 
-For more detail, please see the [assignment 1 page](https://lipyeow.github.io/ics421s18/morea/pardb/experience-hw1.html).
+## <a name = "a2"></a> Assignment 2: Naive SQL Processing for Parallel DBMS
+    * Understand how to process simple SQL queries in parallel
+    * Able to write a program to process SQL queries in parallel
+    * Able to write a program to load data to partitioned table in parallel.
+    * Able to document the program design and usage clearly
+    
+For more details, please see the [assignment 1](https://lipyeow.github.io/ics421s18/morea/queryproc/experience-hw2.html).
